@@ -4,6 +4,6 @@
 
 ## Завдання 1
 
-- [Завдання 1](practice_OOP_Hirich/task1/task1.md)
+- [Завдання 1](Main/task1/task1.md)
 
 
