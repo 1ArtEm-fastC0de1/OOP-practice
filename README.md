@@ -6,4 +6,7 @@
 
 - [Завдання 1](Main/task1/task1.md)
 
+## Завдання 2
+
+- [Завдання 2](Main/task1/task2.md)
 
