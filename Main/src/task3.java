@@ -1,159 +1,237 @@
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
 
 /**
- * Головний клас
+ * Головний клас запуску програми
  */
-public class task3 {
+public class Task3 {
 
     public static void main(String[] args) {
-
-        // Колекція результатів
-        List<NumberData> results = new ArrayList<>();
-
-        // Додаємо дані
-        results.add(process("11888821"));
-        results.add(process("18111188"));
-
-        // Фабрика
-        DisplayFactory factory = new TextDisplayFactory();
-
-        // Виведення
-        System.out.println("=== RESULTS ===");
-        for (NumberData data : results) {
-            Display display = factory.createDisplay();
-            display.show(data);
-        }
-
-        // Серіалізація колекції
-        try {
-            save(results, "collection.ser");
-            List<NumberData> loaded = load("collection.ser");
-
-            System.out.println("\n=== AFTER DESERIALIZATION ===");
-            for (NumberData data : loaded) {
-                Display display = factory.createDisplay();
-                display.show(data);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Обробка числа
-     */
-    public static NumberData process(String number) {
-        NumberData data = new NumberData(number);
-        Calculator calc = new Calculator(data);
-        calc.calculate();
-        return data;
-    }
-
-    /**
-     * Збереження колекції
-     */
-    public static void save(List<NumberData> list, String file) throws IOException {
-        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));
-        oos.writeObject(list);
-        oos.close();
-    }
-
-    /**
-     * Завантаження колекції
-     */
-    public static List<NumberData> load(String file) throws IOException, ClassNotFoundException {
-        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
-        List<NumberData> list = (List<NumberData>) ois.readObject();
-        ois.close();
-        return list;
+        // Створення об'єкта через фабричний метод
+        Menu menu = new Menu(new ViewableResult().getView());
+        menu.menu();
     }
 }
 
 /**
- * Клас даних (Serializable)
+ * Клас для роботи з меню користувача
+ */
+class Menu {
+
+    private View view; // Інтерфейс для роботи з відображенням
+
+    public Menu(View view) {
+        this.view = view;
+    }
+
+    /**
+     * Діалогове меню
+     */
+    public void menu() {
+        String s = null;
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+
+        do {
+            try {
+                System.out.println("\nВведіть команду:");
+                System.out.print("'q' - вихід, 'v' - показати, 'g' - згенерувати, 's' - зберегти, 'r' - відновити: ");
+                s = in.readLine();
+
+                switch (s) {
+                    case "q":
+                        System.out.println("Вихід.");
+                        break;
+                    case "v":
+                        view.viewShow();
+                        break;
+                    case "g":
+                        view.viewInit();
+                        view.viewShow();
+                        break;
+                    case "s":
+                        view.viewSave();
+                        break;
+                    case "r":
+                        view.viewRestore();
+                        view.viewShow();
+                        break;
+                    default:
+                        System.out.println("Невірна команда.");
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        } while (!s.equals("q"));
+    }
+}
+
+/**
+ * Інтерфейс для відображення результатів
+ */
+interface View {
+
+    void viewShow();        // показ результатів
+
+    void viewInit();        // ініціалізація (генерація даних)
+
+    void viewSave() throws IOException;   // збереження
+
+    void viewRestore() throws Exception;  // відновлення
+}
+
+/**
+ * Інтерфейс фабрики (Factory Method)
+ */
+interface Viewable {
+    View getView(); // створення об'єкта
+}
+
+/**
+ * Клас-фабрика
+ */
+class ViewableResult implements Viewable {
+
+    @Override
+    public View getView() {
+        return new ViewResult(); // створює конкретний об'єкт
+    }
+}
+
+/**
+ * Клас для зберігання даних
  */
 class NumberData implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private String number;
-    private int count1;
-    private int count8;
+    private int number;        // вихідне число
+    private String octal;      // 8-ричне представлення
+    private String hex;        // 16-ричне представлення
 
-    private transient String tempInfo;
+    private int octalCount;    // кількість цифр (8-рична)
+    private int hexCount;      // кількість цифр (16-рична)
 
-    public NumberData(String number) {
+    private transient String tempInfo; // не серіалізується
+
+    public NumberData(int number) {
         this.number = number;
-        this.tempInfo = "Temp info";
+        this.tempInfo = "Тимчасова інформація";
     }
 
-    public String getNumber() { return number; }
-    public int getCount1() { return count1; }
-    public int getCount8() { return count8; }
+    public int getNumber() { return number; }
 
-    public void setCount1(int c) { count1 = c; }
-    public void setCount8(int c) { count8 = c; }
+    public String getOctal() { return octal; }
+    public String getHex() { return hex; }
+
+    public int getOctalCount() { return octalCount; }
+    public int getHexCount() { return hexCount; }
+
+    public void setOctal(String octal) { this.octal = octal; }
+    public void setHex(String hex) { this.hex = hex; }
+
+    public void setOctalCount(int c) { this.octalCount = c; }
+    public void setHexCount(int c) { this.hexCount = c; }
 }
 
 /**
- * Клас обчислення (агрегування)
+ * Клас для виконання обчислень (агрегування)
  */
 class Calculator {
 
-    private NumberData data;
+    private NumberData data; // посилання на дані
 
     public Calculator(NumberData data) {
         this.data = data;
     }
 
+    /**
+     * Виконує обчислення:
+     * переводить число у 8 та 16 системи і рахує кількість цифр
+     */
     public void calculate() {
-        int c1 = 0, c8 = 0;
+        int number = data.getNumber();
 
-        for (char c : data.getNumber().toCharArray()) {
-            if (c == '1') c1++;
-            if (c == '8') c8++;
+        // Переведення у різні системи числення
+        String octal = Integer.toOctalString(number);
+        String hex = Integer.toHexString(number);
+
+        // Запис результатів
+        data.setOctal(octal);
+        data.setHex(hex);
+
+        // Підрахунок кількості цифр
+        data.setOctalCount(octal.length());
+        data.setHexCount(hex.length());
+    }
+}
+
+/**
+ * Основний клас логіки:
+ * робота з колекцією та серіалізацією
+ */
+class ViewResult implements View {
+
+    private static final String FILE = "data.ser";
+
+    private ArrayList<NumberData> list = new ArrayList<>(); // колекція
+
+    /**
+     * Генерація випадкових даних
+     */
+    @Override
+    public void viewInit() {
+        list.clear();
+
+        for (int i = 0; i < 5; i++) {
+            int num = (int)(Math.random() * 1000);
+
+            NumberData data = new NumberData(num);
+
+            Calculator calc = new Calculator(data);
+            calc.calculate();
+
+            list.add(data);
+        }
+    }
+
+    /**
+     * Виведення результатів
+     */
+    @Override
+    public void viewShow() {
+        System.out.println("\nРезультати:");
+
+        for (NumberData d : list) {
+            System.out.println(
+                "Число: " + d.getNumber() +
+                " | 8-рична: " + d.getOctal() +
+                " (" + d.getOctalCount() + ")" +
+                " | 16-рична: " + d.getHex() +
+                " (" + d.getHexCount() + ")"
+            );
         }
 
-        data.setCount1(c1);
-        data.setCount8(c8);
+        System.out.println("Кінець.");
     }
-}
 
-/**
- * Інтерфейс відображення
- */
-interface Display {
-    void show(NumberData data);
-}
-
-/**
- * Конкретна реалізація (текстовий вивід)
- */
-class TextDisplay implements Display {
-
+    /**
+     * Збереження колекції у файл
+     */
     @Override
-    public void show(NumberData data) {
-        System.out.println("Number: " + data.getNumber() +
-                " | Count1: " + data.getCount1() +
-                " | Count8: " + data.getCount8());
+    public void viewSave() throws IOException {
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE));
+        oos.writeObject(list);
+        oos.close();
     }
-}
 
-/**
- * Інтерфейс фабрики
- */
-interface DisplayFactory {
-    Display createDisplay();
-}
-
-/**
- * Конкретна фабрика
- */
-class TextDisplayFactory implements DisplayFactory {
-
+    /**
+     * Відновлення колекції з файлу
+     */
     @Override
-    public Display createDisplay() {
-        return new TextDisplay();
+    public void viewRestore() throws Exception {
+        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILE));
+        list = (ArrayList<NumberData>) ois.readObject();
+        ois.close();
     }
 }
