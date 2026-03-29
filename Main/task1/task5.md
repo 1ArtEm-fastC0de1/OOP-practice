@@ -10,7 +10,8 @@
 
 ## 5.Розробити клас для тестування функціональності програми.
 
-![task5](task5.png)
+<img width="961" height="927" alt="image" src="https://github.com/user-attachments/assets/655681b2-f23e-4556-ac70-06ac2cc09c18" />
+
 
 ## Код
 
