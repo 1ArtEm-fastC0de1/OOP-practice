@@ -1,20 +1,27 @@
 import java.io.*;
 
 /**
- * Головний клас для запуску програми
+ * Головний клас
  */
-public class task2 {
+public class Main {
 
     public static void main(String[] args) {
 
-        // Тест обчислення
-        NumberData data = new NumberData("11888821");
+        // Тест
+        NumberData data = new NumberData(100);
 
         Calculator calc = new Calculator(data);
         calc.calculate();
 
-        assert data.getCount1() == 3 : "Помилка підрахунку 1";
-        assert data.getCount8() == 4 : "Помилка підрахунку 8";
+        System.out.println("Octal: " + data.getOctal());
+        System.out.println("Hex: " + data.getHex());
+
+        System.out.println("Octal digits: " + data.getOctalCount());
+        System.out.println("Hex digits: " + data.getHexCount());
+
+        // Перевірка
+        assert data.getOctalCount() == 3 : "Помилка 8-річного підрахунку";
+        assert data.getHexCount() == 2 : "Помилка 16-річного підрахунку";
 
         System.out.println("Calculation test passed!");
 
@@ -23,8 +30,8 @@ public class task2 {
             SerializationDemo.save(data, "test.ser");
             NumberData loaded = SerializationDemo.load("test.ser");
 
-            assert loaded.getCount1() == data.getCount1();
-            assert loaded.getCount8() == data.getCount8();
+            assert loaded.getOctalCount() == data.getOctalCount();
+            assert loaded.getHexCount() == data.getHexCount();
 
             System.out.println("Serialization test passed!");
 
@@ -38,45 +45,45 @@ public class task2 {
 }
 
 /**
- * Клас для зберігання параметрів і результатів обчислення.
+ * Клас для зберігання даних
  */
 class NumberData implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    /** Вхідне число */
-    private String number;
+    private int number;
 
-    /** Кількість цифр '1' */
-    private int count1;
+    private String octal;
+    private String hex;
 
-    /** Кількість цифр '8' */
-    private int count8;
+    private int octalCount;
+    private int hexCount;
 
-    /** transient поле (не серіалізується) */
     private transient String tempInfo;
 
-    /**
-     * Конструктор
-     * @param number десяткове число
-     */
-    public NumberData(String number) {
+    public NumberData(int number) {
         this.number = number;
         this.tempInfo = "Temporary info";
     }
 
-    public String getNumber() { return number; }
-    public int getCount1() { return count1; }
-    public int getCount8() { return count8; }
+    public int getNumber() { return number; }
 
-    public void setCount1(int count1) { this.count1 = count1; }
-    public void setCount8(int count8) { this.count8 = count8; }
+    public String getOctal() { return octal; }
+    public String getHex() { return hex; }
+
+    public int getOctalCount() { return octalCount; }
+    public int getHexCount() { return hexCount; }
+
+    public void setOctal(String octal) { this.octal = octal; }
+    public void setHex(String hex) { this.hex = hex; }
+
+    public void setOctalCount(int count) { this.octalCount = count; }
+    public void setHexCount(int count) { this.hexCount = count; }
 
     public String getTempInfo() { return tempInfo; }
-    public void setTempInfo(String tempInfo) { this.tempInfo = tempInfo; }
 }
 
 /**
- * Клас для виконання обчислень (агрегування)
+ * Клас обчислення (агрегування)
  */
 class Calculator {
 
@@ -86,40 +93,34 @@ class Calculator {
         this.data = data;
     }
 
-    /**
-     * Підрахунок цифр '1' та '8'
-     */
     public void calculate() {
-        int count1 = 0;
-        int count8 = 0;
 
-        for (char c : data.getNumber().toCharArray()) {
-            if (c == '1') count1++;
-            if (c == '8') count8++;
-        }
+        int number = data.getNumber();
 
-        data.setCount1(count1);
-        data.setCount8(count8);
+        // Переведення
+        String octal = Integer.toOctalString(number);
+        String hex = Integer.toHexString(number);
+
+        // Підрахунок
+        data.setOctal(octal);
+        data.setHex(hex);
+
+        data.setOctalCount(octal.length());
+        data.setHexCount(hex.length());
     }
 }
 
 /**
- * Клас для демонстрації серіалізації
+ * Серіалізація
  */
 class SerializationDemo {
 
-    /**
-     * Збереження об'єкта у файл
-     */
     public static void save(NumberData data, String filename) throws IOException {
         ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename));
         oos.writeObject(data);
         oos.close();
     }
 
-    /**
-     * Завантаження об'єкта з файлу
-     */
     public static NumberData load(String filename) throws IOException, ClassNotFoundException {
         ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename));
         NumberData data = (NumberData) ois.readObject();
@@ -127,19 +128,16 @@ class SerializationDemo {
         return data;
     }
 
-    /**
-     * Демонстрація роботи серіалізації
-     */
     public static void runDemo() {
         try {
-            NumberData data = new NumberData("18123881");
+            NumberData data = new NumberData(255);
 
             Calculator calc = new Calculator(data);
             calc.calculate();
 
             System.out.println("\n--- Before serialization ---");
-            System.out.println("Count 1: " + data.getCount1());
-            System.out.println("Count 8: " + data.getCount8());
+            System.out.println("Octal: " + data.getOctal());
+            System.out.println("Hex: " + data.getHex());
             System.out.println("Temp: " + data.getTempInfo());
 
             save(data, "data.ser");
@@ -147,8 +145,8 @@ class SerializationDemo {
             NumberData loaded = load("data.ser");
 
             System.out.println("\n--- After deserialization ---");
-            System.out.println("Count 1: " + loaded.getCount1());
-            System.out.println("Count 8: " + loaded.getCount8());
+            System.out.println("Octal: " + loaded.getOctal());
+            System.out.println("Hex: " + loaded.getHex());
             System.out.println("Temp: " + loaded.getTempInfo());
 
         } catch (Exception e) {
