@@ -10,7 +10,7 @@
 
 ## 5. Використати коментарі для автоматичної генерації документації засобами javadoc.
 
-![task4](task4.png)
+<img width="781" height="764" alt="image" src="https://github.com/user-attachments/assets/f448be84-502b-4dbd-8a63-16c674c0c3b9" />
 
 ## Код
 
