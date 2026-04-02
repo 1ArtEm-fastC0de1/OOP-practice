@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * Головний клас Task4
+ * Головний клас task4
  */
 public class task4 {
 
