@@ -10,7 +10,7 @@
 
 ## 5. Використати коментарі для автоматичної генерації документації засобами javadoc.
 
-<img width="781" height="764" alt="image" src="https://github.com/user-attachments/assets/f448be84-502b-4dbd-8a63-16c674c0c3b9" />
+<img width="598" height="715" alt="image" src="https://github.com/user-attachments/assets/52cf7008-29c4-43e2-96de-7f082b00fc99" />
 
 ## Код
 
