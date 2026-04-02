@@ -1,197 +1,257 @@
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Formatter;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.util.Scanner;
 
 /**
- * Повний самодостатній приклад:
- * - Item2d
- * - View / Viewable
- * - ViewResult / ViewableResult
- * - ViewTable / ViewableTable
- * - Main клас із меню
- * 
- * Демонструє: фабричний метод, поліморфізм, перевантаження/перевизначення, форматований вивід, серіалізацію
- * @author xone
- * @version 3.0
+ * Головний клас Task4
  */
 public class task4 {
 
-    // ===================== Item2d =====================
-    public static class Item2d implements Serializable {
-        private static final long serialVersionUID = 1L;
-        private double x;
-        private double y;
-
-        public Item2d() { this(0.0,0.0); }
-        public Item2d(double x, double y) { this.x = x; this.y = y; }
-
-        public void setXY(double x, double y) { this.x = x; this.y = y; }
-        public double getX() { return x; }
-        public double getY() { return y; }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof Item2d)) return false;
-            Item2d other = (Item2d) obj;
-            return Double.compare(x, other.x) == 0 && Double.compare(y, other.y) == 0;
-        }
-
-        @Override
-        public String toString() { return String.format("(%.0f; %.3f)", x, y); }
+    public static void main(String[] args) {
+        task4 task = new task4();
+        task.run();
     }
 
-    // ===================== Інтерфейси =====================
-    public interface View {
-        void viewHeader();
-        void viewBody();
-        void viewFooter();
-        void viewShow();
-        void viewInit();
-        void viewSave() throws IOException;
-        void viewRestore() throws Exception;
+    /**
+     * Метод запуску програми
+     */
+    public void run() {
+        // Factory Method для створення табличного view
+        Viewable viewable = new ViewableResultExtended();
+        TableViewExtended tableView = (TableViewExtended) viewable.getView();
+
+        // Параметри користувача
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Введіть ширину таблиці: ");
+        int width = sc.nextInt();
+        System.out.print("Введіть кількість чисел: ");
+        int count = sc.nextInt();
+
+        tableView.setTableWidth(width);
+        tableView.setNumberCount(count);
+
+        // Діалогове меню
+        Menu menu = new Menu((View) tableView);
+        menu.menu();
+    }
+}
+
+/**
+ * Меню для користувача
+ */
+class Menu {
+
+    private View view;
+
+    public Menu(View view) {
+        this.view = view;
     }
 
-    public interface Viewable {
-        View getView();
-    }
+    public void menu() {
+        String command = null;
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        do {
+            try {
+                System.out.println("\nВведіть команду:");
+                System.out.print("'q' - вихід, 'v' - показати, 'g' - згенерувати, 's' - зберегти, 'r' - відновити: ");
+                command = in.readLine();
 
-    // ===================== ViewResult =====================
-    public static class ViewResult implements View {
-        private static final String FNAME = "items.ser";
-        private static final int DEFAULT_NUM = 10;
-        private ArrayList<Item2d> items = new ArrayList<>();
-
-        public ViewResult() { this(DEFAULT_NUM); }
-        public ViewResult(int n) { for(int i=0;i<n;i++) items.add(new Item2d()); }
-
-        public ArrayList<Item2d> getItems() { return items; }
-        protected double calc(double x) { return Math.sin(Math.toRadians(x)); }
-
-        public void init(double stepX) {
-            double x = 0;
-            for(Item2d item: items) { item.setXY(x, calc(x)); x += stepX; }
-        }
-
-        @Override
-        public void viewInit() { init(Math.random()*360.0); }
-
-        @Override
-        public void viewSave() throws IOException {
-            try(ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(FNAME))) {
-                os.writeObject(items);
-            }
-        }
-
-        @SuppressWarnings("unchecked")
-        @Override
-        public void viewRestore() throws Exception {
-            try(ObjectInputStream is = new ObjectInputStream(new FileInputStream(FNAME))) {
-                items = (ArrayList<Item2d>) is.readObject();
-            }
-        }
-
-        @Override
-        public void viewHeader() { System.out.println("Результати:"); }
-
-        @Override
-        public void viewBody() {
-            for(Item2d item: items) System.out.print(item + " ");
-            System.out.println();
-        }
-
-        @Override
-        public void viewFooter() { System.out.println("Кінець."); }
-
-        @Override
-        public void viewShow() { viewHeader(); viewBody(); viewFooter(); }
-    }
-
-    // ===================== Фабрика для ViewResult =====================
-    public static class ViewableResult implements Viewable {
-        @Override
-        public View getView() { return new ViewResult(); }
-    }
-
-    // ===================== ViewTable =====================
-    public static class ViewTable extends ViewResult {
-        private static final int DEFAULT_WIDTH = 20;
-        private int width;
-
-        public ViewTable() { width = DEFAULT_WIDTH; }
-        public ViewTable(int width) { this.width = width; }
-        public ViewTable(int width, int n) { super(n); this.width = width; }
-
-        public int setWidth(int width) { return this.width = width; }
-        public int getWidth() { return width; }
-
-        private void outLine() { for(int i=0;i<width;i++) System.out.print('-'); }
-        private void outLineLn() { outLine(); System.out.println(); }
-
-        private void outHeader() {
-            Formatter fmt = new Formatter();
-            fmt.format("%" + ((width-3)/2) + "s | %" + ((width-3)/2) + "s\n","x","y");
-            System.out.printf(fmt.toString());
-        }
-
-        private void outBody() {
-            Formatter fmt = new Formatter();
-            for(Item2d item: getItems())
-                System.out.printf("%" + ((width-3)/2) + ".0f | %" + ((width-3)/2) + ".3f\n",item.getX(), item.getY());
-        }
-
-        // Перевантаження
-        public final void init(int width) { this.width=width; viewInit(); }
-        public final void init(int width, double stepX) { this.width=width; init(stepX); }
-
-        // Перевизначення
-        @Override
-        public void init(double stepX) { System.out.print("Ініціалізація... "); super.init(stepX); System.out.println("готово."); }
-
-        @Override
-        public void viewHeader() { outHeader(); outLineLn(); }
-        @Override
-        public void viewBody() { outBody(); }
-        @Override
-        public void viewFooter() { outLineLn(); }
-    }
-
-    public static class ViewableTable extends ViewableResult {
-        @Override
-        public View getView() { return new ViewTable(); }
-    }
-
-    // ===================== Main =====================
-    public static class Main {
-        protected View view;
-
-        public Main(View view) { this.view = view; }
-
-        protected void menu() {
-            String s = null;
-            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-            do {
-                do {
-                    System.out.print("Команда ('q' - вихід, 'v' - перегляд, 'g' - генерація, 's' - зберегти, 'r' - відновити): ");
-                    try { s = in.readLine(); } catch(IOException e){System.out.println("Помилка: "+e); System.exit(0);}
-                } while(s.length() != 1);
-
-                switch(s.charAt(0)) {
-                    case 'q': System.out.println("Вихід"); break;
-                    case 'v': view.viewShow(); break;
-                    case 'g': view.viewInit(); view.viewShow(); break;
-                    case 's': try{view.viewSave();}catch(IOException e){System.out.println("Помилка серіалізації: "+e);} view.viewShow(); break;
-                    case 'r': try{view.viewRestore();}catch(Exception e){System.out.println("Помилка відновлення: "+e);} view.viewShow(); break;
-                    default: System.out.println("Невідома команда");
+                switch (command) {
+                    case "q":
+                        System.out.println("Вихід.");
+                        break;
+                    case "v":
+                        view.viewShow();
+                        break;
+                    case "g":
+                        view.viewInit();
+                        view.viewShow();
+                        break;
+                    case "s":
+                        view.viewSave();
+                        break;
+                    case "r":
+                        view.viewRestore();
+                        view.viewShow();
+                        break;
+                    default:
+                        System.out.println("Невірна команда.");
                 }
-            } while(s.charAt(0) != 'q');
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        } while (!"q".equals(command));
+    }
+}
+
+/**
+ * Інтерфейс для View
+ */
+interface View {
+    void viewShow();
+    void viewInit();
+    void viewSave() throws IOException;
+    void viewRestore() throws Exception;
+}
+
+/**
+ * Factory Method інтерфейс
+ */
+interface Viewable {
+    View getView();
+}
+
+/**
+ * Фабрика Task4
+ */
+class ViewableResultExtended implements Viewable {
+    @Override
+    public View getView() {
+        return new TableViewExtended();
+    }
+}
+
+/**
+ * Клас для зберігання даних
+ */
+class NumberData implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    private int number;
+    private String octal;
+    private String hex;
+    private int octalCount;
+    private int hexCount;
+
+    private transient String tempInfo;
+
+    public NumberData(int number) {
+        this.number = number;
+        this.tempInfo = "Тимчасова інформація";
+    }
+
+    public int getNumber() { return number; }
+    public String getOctal() { return octal; }
+    public String getHex() { return hex; }
+    public int getOctalCount() { return octalCount; }
+    public int getHexCount() { return hexCount; }
+
+    public void setNumber(int number) { this.number = number; }
+    public void setOctal(String octal) { this.octal = octal; }
+    public void setHex(String hex) { this.hex = hex; }
+    public void setOctalCount(int c) { this.octalCount = c; }
+    public void setHexCount(int c) { this.hexCount = c; }
+}
+
+/**
+ * Calculator з перевантаженням
+ */
+class Calculator {
+    private NumberData data;
+
+    public Calculator(NumberData data) { this.data = data; }
+
+    // Базовий метод
+    public void calculate() {
+        int number = data.getNumber();
+        data.setOctal(Integer.toOctalString(number));
+        data.setHex(Integer.toHexString(number));
+        data.setOctalCount(data.getOctal().length());
+        data.setHexCount(data.getHex().length());
+    }
+
+    // Перевантажений метод для демонстрації overloading
+    public void calculate(int number) {
+        data.setNumber(number);
+        calculate();
+    }
+}
+
+/**
+ * Табличний View
+ */
+class TableViewExtended implements View {
+
+    private static final String FILE = "data.ser";
+
+    protected ArrayList<NumberData> list;
+    protected int tableWidth = 50;
+    protected int numberCount = 5;
+
+    public TableViewExtended() {
+        list = new ArrayList<>();
+    }
+
+    public void setTableWidth(int width) { this.tableWidth = width; }
+    public void setNumberCount(int count) { this.numberCount = count; }
+
+    @Override
+    public void viewInit() {
+        list.clear();
+        for (int i = 0; i < numberCount; i++) {
+            int num = (int)(Math.random() * 1000);
+            NumberData data = new NumberData(num);
+
+            Calculator calc = new Calculator(data);
+            if (i % 2 == 0) calc.calculate();
+            else calc.calculate(num * 2);
+
+            list.add(data);
+        }
+    }
+
+    @Override
+    public void viewShow() {
+        System.out.println("\nРезультати у вигляді таблиці:");
+        System.out.println("-".repeat(tableWidth));
+        System.out.printf("| %-10s | %-10s | %-10s | %-10s |\n",
+                "Число", "8-рична", "16-рична", "Довжина");
+        System.out.println("-".repeat(tableWidth));
+
+        for (NumberData d : list) {
+            int length = String.valueOf(d.getNumber()).length();
+            System.out.printf("| %-10d | %-10s | %-10s | %-10d |\n",
+                    d.getNumber(), d.getOctal(), d.getHex(), length);
         }
 
-        public static void main(String[] args) {
-            // Для перегляду як таблиці використати:
-            Main main = new Main(new ViewableTable().getView());
-            main.menu();
-        }
+        System.out.println("-".repeat(tableWidth));
+    }
+
+    @Override
+    public void viewSave() throws IOException {
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE));
+        oos.writeObject(list);
+        oos.close();
+    }
+
+    @Override
+    public void viewRestore() throws Exception {
+        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILE));
+        list = (ArrayList<NumberData>) ois.readObject();
+        ois.close();
+    }
+}
+
+/**
+ * Тест Task4
+ */
+class Task4Test {
+    public static void main(String[] args) throws Exception {
+        TableViewExtended view = new TableViewExtended();
+        view.setNumberCount(6);
+        view.setTableWidth(60);
+
+        System.out.println("Генерація даних:");
+        view.viewInit();
+        view.viewShow();
+
+        System.out.println("Збереження даних:");
+        view.viewSave();
+
+        System.out.println("Відновлення даних:");
+        view.viewRestore();
+        view.viewShow();
     }
 }
