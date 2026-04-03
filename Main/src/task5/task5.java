@@ -2,7 +2,10 @@ package task5;
 import java.io.*;
 import java.util.*;
 
-/* ================= MAIN ================= */
+/**
+ * Головний клас програми.
+ * Відповідає за ініціалізацію TableView та запуск меню.
+ */
 public class task5 {
 
     public static void main(String[] args) {
@@ -16,6 +19,10 @@ public class task5 {
         t.run();
     }
 
+    /**
+     * Метод запуску програми.
+     * Ініціалізує TableView, зчитує параметри від користувача та викликає меню.
+     */
     public void run() {
         TableView view = new TableView();
 
@@ -30,15 +37,26 @@ public class task5 {
     }
 }
 
-/* ================= MENU ================= */
+/**
+ * Клас для організації меню користувача.
+ * Забезпечує виконання команд через CommandManager.
+ */
 class Menu {
     private TableView view;
     private CommandManager manager = CommandManager.getInstance();
 
+    /**
+     * Конструктор.
+     * @param view екземпляр TableView для роботи з даними
+     */
     public Menu(TableView view) {
         this.view = view;
     }
 
+    /**
+     * Основний цикл меню.
+     * Зчитує команди користувача і виконує відповідні дії.
+     */
     public void menu() {
         Scanner sc = new Scanner(System.in);
         String cmd;
@@ -81,32 +99,47 @@ class Menu {
     }
 }
 
-/* ================= COMMAND ================= */
+/**
+ * Інтерфейс команди.
+ * Визначає методи execute() та undo() для реалізації патерну Command.
+ */
 interface Command {
     void execute();
-
     void undo();
 }
 
-/* ================= SINGLETON ================= */
+/**
+ * Singleton-клас для керування виконанням команд.
+ * Забезпечує історію виконаних команд для можливості undo.
+ */
 class CommandManager {
     private static CommandManager instance;
     private Stack<Command> history = new Stack<>();
 
-    private CommandManager() {
-    }
+    private CommandManager() {}
 
+    /**
+     * Отримання екземпляру Singleton.
+     * @return екземпляр CommandManager
+     */
     public static CommandManager getInstance() {
         if (instance == null)
             instance = new CommandManager();
         return instance;
     }
 
+    /**
+     * Виконання команди та додавання її до історії.
+     * @param cmd команда для виконання
+     */
     public void execute(Command cmd) {
         cmd.execute();
         history.push(cmd);
     }
 
+    /**
+     * Скасування останньої виконаної команди.
+     */
     public void undo() {
         if (!history.isEmpty()) {
             Command cmd = history.pop();
@@ -117,7 +150,9 @@ class CommandManager {
     }
 }
 
-/* ================= COMMANDS ================= */
+/**
+ * Команда генерації даних у таблиці.
+ */
 class GenerateCommand implements Command {
     private TableView view;
 
@@ -136,6 +171,9 @@ class GenerateCommand implements Command {
     }
 }
 
+/**
+ * Команда відображення даних у таблиці.
+ */
 class ShowCommand implements Command {
     private TableView view;
 
@@ -152,6 +190,9 @@ class ShowCommand implements Command {
     }
 }
 
+/**
+ * Команда збереження даних у файл.
+ */
 class SaveCommand implements Command {
     private TableView view;
 
@@ -173,6 +214,9 @@ class SaveCommand implements Command {
     }
 }
 
+/**
+ * Команда відновлення даних із файлу.
+ */
 class RestoreCommand implements Command {
     private TableView view;
 
@@ -194,10 +238,16 @@ class RestoreCommand implements Command {
     }
 }
 
-/* ================= MACRO ================= */
+/**
+ * Команда макросу, що виконує послідовність інших команд.
+ */
 class MacroCommand implements Command {
     private List<Command> list = new ArrayList<>();
 
+    /**
+     * Додавання команди до макросу.
+     * @param c команда для додавання
+     */
     public void add(Command c) {
         list.add(c);
     }
@@ -213,25 +263,35 @@ class MacroCommand implements Command {
     }
 }
 
-/* ================= VIEW ================= */
+/**
+ * Інтерфейс для відображення даних.
+ */
 interface View {
     void show();
-
     void viewInit();
 }
 
-/* ================= DATA ================= */
+/**
+ * Клас для зберігання числових даних у таблиці.
+ */
 class NumberData implements Serializable {
     public int number;
     public String oct;
     public String hex;
 
+    /**
+     * Конструктор.
+     * @param n число для збереження
+     */
     public NumberData(int n) {
         this.number = n;
     }
 }
 
-/* ================= TABLE VIEW ================= */
+
+/**
+ * Клас для представлення таблиці даних.
+ */
 class TableView implements View {
     private static final String FILE = "data.ser";
 
@@ -239,14 +299,25 @@ class TableView implements View {
     private int width = 50;
     private int count = 5;
 
+    /**
+     * Встановлення ширини таблиці.
+     * @param w ширина таблиці
+     */
     public void setWidth(int w) {
         width = w;
     }
 
+    /**
+     * Встановлення кількості чисел у таблиці.
+     * @param c кількість чисел
+     */
     public void setCount(int c) {
         count = c;
     }
 
+    /**
+     * Ініціалізація даних таблиці випадковими числами.
+     */
     @Override
     public void viewInit() {
         list.clear();
@@ -259,6 +330,9 @@ class TableView implements View {
         }
     }
 
+    /**
+     * Відображення даних таблиці у консолі.
+     */
     @Override
     public void show() {
         System.out.println("\nTable:");
@@ -269,16 +343,27 @@ class TableView implements View {
         System.out.println("-".repeat(width));
     }
 
+    /**
+     * Очищення даних таблиці.
+     */
     public void clear() {
         list.clear();
     }
 
+    /**
+     * Збереження даних таблиці у файл.
+     * @throws Exception у випадку помилки запису
+     */
     public void save() throws Exception {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE))) {
             oos.writeObject(list);
         }
     }
 
+    /**
+     * Відновлення даних таблиці з файлу.
+     * @throws Exception у випадку помилки читання
+     */
     public void restore() throws Exception {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILE))) {
             list = (ArrayList<NumberData>) ois.readObject();
@@ -286,7 +371,9 @@ class TableView implements View {
     }
 }
 
-/* ================= TEST ================= */
+/**
+ * Тестовий клас для перевірки генерації та відображення даних.
+ */
 class Task5Test {
     public static void main(String[] args) {
         TableView view = new TableView();
