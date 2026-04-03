@@ -22,9 +22,9 @@ public class task4 {
 
         // Параметри користувача
         Scanner sc = new Scanner(System.in);
-        System.out.print("Введіть ширину таблиці: ");
+        System.out.print("Enter table width: ");
         int width = sc.nextInt();
-        System.out.print("Введіть кількість чисел: ");
+        System.out.print("Enter number of values: ");
         int count = sc.nextInt();
 
         tableView.setTableWidth(width);
@@ -52,13 +52,13 @@ class Menu {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         do {
             try {
-                System.out.println("\nВведіть команду:");
-                System.out.print("'q' - вихід, 'v' - показати, 'g' - згенерувати, 's' - зберегти, 'r' - відновити: ");
+                System.out.println("\nEnter command:");
+                System.out.print("'q' - exit, 'v' - show, 'g' - generate, 's' - save, 'r' - restore: ");
                 command = in.readLine();
 
                 switch (command) {
                     case "q":
-                        System.out.println("Вихід.");
+                        System.out.println("Exit.");
                         break;
                     case "v":
                         view.viewShow();
@@ -75,7 +75,7 @@ class Menu {
                         view.viewShow();
                         break;
                     default:
-                        System.out.println("Невірна команда.");
+                        System.out.println("Invalid command.");
                 }
 
             } catch (Exception e) {
@@ -91,8 +91,11 @@ class Menu {
  */
 interface View {
     void viewShow();
+
     void viewInit();
+
     void viewSave() throws IOException;
+
     void viewRestore() throws Exception;
 }
 
@@ -129,20 +132,48 @@ class NumberData implements Serializable {
 
     public NumberData(int number) {
         this.number = number;
-        this.tempInfo = "Тимчасова інформація";
+        this.tempInfo = "Temporary info";
     }
 
-    public int getNumber() { return number; }
-    public String getOctal() { return octal; }
-    public String getHex() { return hex; }
-    public int getOctalCount() { return octalCount; }
-    public int getHexCount() { return hexCount; }
+    public int getNumber() {
+        return number;
+    }
 
-    public void setNumber(int number) { this.number = number; }
-    public void setOctal(String octal) { this.octal = octal; }
-    public void setHex(String hex) { this.hex = hex; }
-    public void setOctalCount(int c) { this.octalCount = c; }
-    public void setHexCount(int c) { this.hexCount = c; }
+    public String getOctal() {
+        return octal;
+    }
+
+    public String getHex() {
+        return hex;
+    }
+
+    public int getOctalCount() {
+        return octalCount;
+    }
+
+    public int getHexCount() {
+        return hexCount;
+    }
+
+    public void setNumber(int number) {
+        this.number = number;
+    }
+
+    public void setOctal(String octal) {
+        this.octal = octal;
+    }
+
+    public void setHex(String hex) {
+        this.hex = hex;
+    }
+
+    public void setOctalCount(int c) {
+        this.octalCount = c;
+    }
+
+    public void setHexCount(int c) {
+        this.hexCount = c;
+    }
 }
 
 /**
@@ -151,7 +182,9 @@ class NumberData implements Serializable {
 class Calculator {
     private NumberData data;
 
-    public Calculator(NumberData data) { this.data = data; }
+    public Calculator(NumberData data) {
+        this.data = data;
+    }
 
     // Базовий метод
     public void calculate() {
@@ -184,30 +217,38 @@ class TableViewExtended implements View {
         list = new ArrayList<>();
     }
 
-    public void setTableWidth(int width) { this.tableWidth = width; }
-    public void setNumberCount(int count) { this.numberCount = count; }
+    public void setTableWidth(int width) {
+        this.tableWidth = width;
+    }
+
+    public void setNumberCount(int count) {
+        this.numberCount = count;
+    }
 
     @Override
     public void viewInit() {
         list.clear();
         for (int i = 0; i < numberCount; i++) {
-            int num = (int)(Math.random() * 1000);
+            int num = (int) (Math.random() * 1000);
             NumberData data = new NumberData(num);
 
             Calculator calc = new Calculator(data);
-            if (i % 2 == 0) calc.calculate();
-            else calc.calculate(num * 2);
+            if (i % 2 == 0)
+                data.setNumber(num); 
+            else
+                data.setNumber(num * 2);
 
+            calc.calculate();
             list.add(data);
         }
     }
 
     @Override
     public void viewShow() {
-        System.out.println("\nРезультати у вигляді таблиці:");
+        System.out.println("\nResults in table format:");
         System.out.println("-".repeat(tableWidth));
         System.out.printf("| %-10s | %-10s | %-10s | %-10s |\n",
-                "Число", "8-рична", "16-рична", "Довжина");
+                "Number", "Octal", "Hex", "Length");
         System.out.println("-".repeat(tableWidth));
 
         for (NumberData d : list) {
@@ -243,14 +284,14 @@ class Task4Test {
         view.setNumberCount(6);
         view.setTableWidth(60);
 
-        System.out.println("Генерація даних:");
+        System.out.println("Data generation:");
         view.viewInit();
         view.viewShow();
 
-        System.out.println("Збереження даних:");
+        System.out.println("Saving data:");
         view.viewSave();
 
-        System.out.println("Відновлення даних:");
+        System.out.println("Restoring data:");
         view.viewRestore();
         view.viewShow();
     }
