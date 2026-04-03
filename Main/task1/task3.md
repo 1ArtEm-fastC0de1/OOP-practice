@@ -6,7 +6,8 @@
 ## 4. Реалізувати ці методи виведення результатів у текстовому вигляді.
 ## 5. Розробити тареалізувати інтерфейс для "фабрикуючого" методу.
 
-<img width="838" height="397" alt="image" src="https://github.com/user-attachments/assets/10150569-e40e-4fdb-92f8-9fe1c76e1605" />
+<img width="770" height="576" alt="image" src="https://github.com/user-attachments/assets/9fc81842-1393-4674-962e-5a7e783dac50" />
+
 
 ## Код
 
