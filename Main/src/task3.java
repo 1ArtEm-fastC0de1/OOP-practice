@@ -33,13 +33,13 @@ class Menu {
 
         do {
             try {
-                System.out.println("\nВведіть команду:");
-                System.out.print("'q' - вихід, 'v' - показати, 'g' - згенерувати, 's' - зберегти, 'r' - відновити: ");
+                System.out.println("\nEnter command:");
+                System.out.print("'q' - exit, 'v' - show, 'g' - generate, 's' - save, 'r' - restore: ");
                 s = in.readLine();
 
                 switch (s) {
                     case "q":
-                        System.out.println("Вихід.");
+                        System.out.println("Exit.");
                         break;
                     case "v":
                         view.viewShow();
@@ -56,7 +56,7 @@ class Menu {
                         view.viewShow();
                         break;
                     default:
-                        System.out.println("Невірна команда.");
+                        System.out.println("Invalid command.");
                 }
 
             } catch (Exception e) {
@@ -200,19 +200,19 @@ class ViewResult implements View {
      */
     @Override
     public void viewShow() {
-        System.out.println("\nРезультати:");
+        System.out.println("\nResults:");
 
         for (NumberData d : list) {
             System.out.println(
-                "Число: " + d.getNumber() +
-                " | 8-рична: " + d.getOctal() +
+                "Number: " + d.getNumber() +
+                " | Octal: " + d.getOctal() +
                 " (" + d.getOctalCount() + ")" +
-                " | 16-рична: " + d.getHex() +
+                " | Hex: " + d.getHex() +
                 " (" + d.getHexCount() + ")"
             );
         }
 
-        System.out.println("Кінець.");
+        System.out.println("End.");
     }
 
     /**
