@@ -7,26 +7,34 @@ import java.util.ArrayList;
 public class task3 {
 
     public static void main(String[] args) {
-        // Створення об'єкта через фабричний метод
-        Menu menu = new Menu(new ViewableResult().getView());
+
+        Viewable viewable;
+
+        // Перемикач типу відображення
+        int type = 1;
+
+        if (type == 1) {
+            viewable = new ViewableResult();
+        } else {
+            viewable = new ViewableShort();
+        }
+
+        Menu menu = new Menu(viewable.getView());
         menu.menu();
     }
 }
 
 /**
- * Клас для роботи з меню користувача
+ * Клас меню (діалоговий режим)
  */
 class Menu {
 
-    private View view; // Інтерфейс для роботи з відображенням
+    private View view;
 
     public Menu(View view) {
         this.view = view;
     }
 
-    /**
-     * Діалогове меню
-     */
     public void menu() {
         String s = null;
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -68,51 +76,62 @@ class Menu {
 }
 
 /**
- * Інтерфейс для відображення результатів
+ * Інтерфейс відображення
  */
 interface View {
 
-    void viewShow();        // показ результатів
+    void viewShow();
 
-    void viewInit();        // ініціалізація (генерація даних)
+    void viewInit();
 
-    void viewSave() throws IOException;   // збереження
+    void viewSave() throws IOException;
 
-    void viewRestore() throws Exception;  // відновлення
+    void viewRestore() throws Exception;
 }
 
 /**
- * Інтерфейс фабрики (Factory Method)
+ * Інтерфейс фабрики
  */
 interface Viewable {
-    View getView(); // створення об'єкта
+    View getView();
 }
 
 /**
- * Клас-фабрика
+ * Фабрика для повного відображення
  */
 class ViewableResult implements Viewable {
 
     @Override
     public View getView() {
-        return new ViewResult(); // створює конкретний об'єкт
+        return new ViewResult();
     }
 }
 
 /**
- * Клас для зберігання даних
+ * Фабрика для скороченого відображення
+ */
+class ViewableShort implements Viewable {
+
+    @Override
+    public View getView() {
+        return new ViewShort();
+    }
+}
+
+/**
+ * Клас даних (Serializable)
  */
 class NumberData implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private int number;        // вихідне число
-    private String octal;      // 8-ричне представлення
-    private String hex;        // 16-ричне представлення
+    private int number;
+    private String octal;
+    private String hex;
 
-    private int octalCount;    // кількість цифр (8-рична)
-    private int hexCount;      // кількість цифр (16-рична)
+    private int octalCount;
+    private int hexCount;
 
-    private transient String tempInfo; // не серіалізується
+    private transient String tempInfo;
 
     public NumberData(int number) {
         this.number = number;
@@ -135,50 +154,39 @@ class NumberData implements Serializable {
 }
 
 /**
- * Клас для виконання обчислень (агрегування)
+ * Клас обчислення
  */
 class Calculator {
 
-    private NumberData data; // посилання на дані
+    private NumberData data;
 
     public Calculator(NumberData data) {
         this.data = data;
     }
 
-    /**
-     * Виконує обчислення:
-     * переводить число у 8 та 16 системи і рахує кількість цифр
-     */
     public void calculate() {
         int number = data.getNumber();
 
-        // Переведення у різні системи числення
         String octal = Integer.toOctalString(number);
         String hex = Integer.toHexString(number);
 
-        // Запис результатів
         data.setOctal(octal);
         data.setHex(hex);
 
-        // Підрахунок кількості цифр
         data.setOctalCount(octal.length());
         data.setHexCount(hex.length());
     }
 }
 
 /**
- * Основний клас логіки:
- * робота з колекцією та серіалізацією
+ * Повне відображення (робота з колекцією)
  */
 class ViewResult implements View {
 
     private static final String FILE = "data.ser";
 
-    private ArrayList<NumberData> list = new ArrayList<>(); // колекція
+    private ArrayList<NumberData> list = new ArrayList<>();
 
-    /**
-     * Генерація випадкових даних
-     */
     @Override
     public void viewInit() {
         list.clear();
@@ -187,17 +195,12 @@ class ViewResult implements View {
             int num = (int)(Math.random() * 1000);
 
             NumberData data = new NumberData(num);
-
-            Calculator calc = new Calculator(data);
-            calc.calculate();
+            new Calculator(data).calculate();
 
             list.add(data);
         }
     }
 
-    /**
-     * Виведення результатів
-     */
     @Override
     public void viewShow() {
         System.out.println("\nResults:");
@@ -215,9 +218,6 @@ class ViewResult implements View {
         System.out.println("End.");
     }
 
-    /**
-     * Збереження колекції у файл
-     */
     @Override
     public void viewSave() throws IOException {
         ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE));
@@ -225,13 +225,31 @@ class ViewResult implements View {
         oos.close();
     }
 
-    /**
-     * Відновлення колекції з файлу
-     */
     @Override
     public void viewRestore() throws Exception {
         ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILE));
         list = (ArrayList<NumberData>) ois.readObject();
         ois.close();
     }
+}
+
+/**
+ * Скорочене відображення (другий варіант)
+ */
+class ViewShort implements View {
+
+    @Override
+    public void viewShow() {
+        System.out.println("\nShort view:");
+        System.out.println("Data generated or loaded.");
+    }
+
+    @Override
+    public void viewInit() {}
+
+    @Override
+    public void viewSave() {}
+
+    @Override
+    public void viewRestore() {}
 }
