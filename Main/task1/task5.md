@@ -10,8 +10,10 @@
 
 ## 5.Розробити клас для тестування функціональності програми.
 
-<img width="945" height="770" alt="image" src="https://github.com/user-attachments/assets/9852ae33-6c56-4311-94da-566a660cb95d" />
-<img width="961" height="925" alt="image" src="https://github.com/user-attachments/assets/1347d689-a555-461f-9b47-be548f5017ef" />
+<img width="605" height="434" alt="image" src="https://github.com/user-attachments/assets/9cfe0d99-5b49-416d-8d63-4e19b1b96ef8" />
+
+<img width="614" height="551" alt="image" src="https://github.com/user-attachments/assets/bf5d47b2-3244-460a-98cc-94cc84f3990e" />
+
 
 
 ## Код
