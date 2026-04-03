@@ -3,9 +3,17 @@
 ## 1.Продемонструвати можливість паралельної обробки елементів колекції (пошук мінімуму, максимуму, обчислення середнього значення відбір за критерієм, статистична обробка тощо).
 ## 2. Управління чергою завдань (команд) реалізувати за допомогою шаблону Worker Thread.
 
-<img width="580" height="269" alt="image" src="https://github.com/user-attachments/assets/fe875b6e-31f7-4ff3-955e-5d0806795dc3" />
+![img1](https://github.com/user-attachments/assets/e1ae4caa-8cae-4f72-b8be-f436275c5e80)
+
+<br>
+
+![img2](https://github.com/user-attachments/assets/107b5f85-bb33-4a5c-8f69-bcf6bceff6d6)
+
+<br>
+
+![img3](https://github.com/user-attachments/assets/edb1e6a2-95a8-4574-b821-12c1aeec8593)
 
 
 ## Код
 
-[Переглянути код](../src/task6.java)
+[Переглянути код](../src/task6/task6.java)
