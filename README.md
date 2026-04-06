@@ -26,3 +26,7 @@
 
 - [Завдання 6](Main/task1/task6.md)
 
+## Завдання 6
+
+- [Завдання 7](Main/task1/task7/task7.md)
+
